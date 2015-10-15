@@ -2,7 +2,7 @@
 require_once('directbilling.php');
 @session_start();
 
-define('DTIC_API_KEY', 'bad6ee38a4b4b6e74c0dd968a6d5fa90');
+define('DTIC_API_KEY', '');
 
 
 $billing = new DirectBilling(DTIC_API_KEY);
