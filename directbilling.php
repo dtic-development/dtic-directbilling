@@ -21,7 +21,7 @@ Class DirectBilling {
         $this->apiKey = $apiKey;
     }
 
-    function checkSubscription (){
+    function checkSubscription ($extra = null){
 
         $apiKey = $this->apiKey;
 
@@ -83,8 +83,11 @@ Class DirectBilling {
                 $url = preg_replace('~(\?|&)token=[^&]*~','$1',$url);
                 error_log ("Current url without token ".$url);
 
-                $this->redirect(URL."?w=".$apiKey."&f=".$url);
-
+                $urlRedirect = URL."?w=".$apiKey."&f=".$url;
+                if(!empty($extra)) {
+                    $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
+                }
+                $this->redirect($urlRedirect);
             }
 
             return array('status' => $output, 'token' => $token);
@@ -93,7 +96,11 @@ Class DirectBilling {
         else{
             //Token was not on the session neither on the request
             //Request a new one identifying the customer and/or creating a subscription
-            $this->redirect(URL."?w=".$apiKey."&f=".$this->curPageURL());
+            $urlRedirect = URL."?w=".$apiKey."&f=".$this->curPageURL();
+            if(!empty($extra)) {
+                $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
+            }
+            $this->redirect($urlRedirect);
 
         }
     }
