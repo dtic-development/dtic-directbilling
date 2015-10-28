@@ -9,6 +9,8 @@ $billing = new DirectBilling(DTIC_API_KEY);
 
 $subscription = $billing->checkSubscription('tracker');
 
+print_r($subscription);
+
 if($subscription['status'] == 0) {
     $msg = "Subscription Active";
 }
