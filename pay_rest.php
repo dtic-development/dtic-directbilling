@@ -2,15 +2,10 @@
 require_once('directbilling_rest.php');
 @session_start();
 
-//define('DTIC_API_KEY', '');
+define('DTIC_API_KEY', 'bad6ee38a4b4b6e74c0dd968a6d5fa90');
 
-if(empty($_GET['apiKey'])) {
-    die('$_GET[apiKey] needed for test purposes');
-}
 
-$apiKey = $_GET['apiKey'];
-
-$billing = new DirectBilling($apiKey);
+$billing = new DirectBilling(DTIC_API_KEY);
 
 $subscription = $billing->checkSubscription('tracker');
 

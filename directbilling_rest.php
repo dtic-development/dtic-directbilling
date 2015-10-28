@@ -89,6 +89,7 @@ class DirectBilling {
                 $currentUrlWithoutToken = preg_replace('~(\?|&)token=[^&]*~', '$1', $this->currentPageURL());
 
                 $urlRedirect = URL."?w=".$this->apiKey."&f=".$currentUrlWithoutToken;
+
                 if(!empty($extra)) {
                     $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
                 }
@@ -130,7 +131,7 @@ class DirectBilling {
         $response = $this->restGET(WS_LIST, array(
             'apiKey'    =>  $this->apiKey
         ));
-        if(!empty($response['status'])) {
+        if(!empty($response)) {
             return $response;
         }
         return false;
