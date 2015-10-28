@@ -81,7 +81,7 @@ class DirectBilling {
                 'token'     =>  $token
             ));
 
-            if(!empty($response['status']) && $response['status'] == TOKEN_VALID) {
+            if(!empty($response) && $response['status'] == TOKEN_VALID) {
                 $_SESSION['token'] = $token;
             }
             else {
@@ -117,7 +117,7 @@ class DirectBilling {
                 'apiKey'    =>  $this->apiKey,
                 'token'     =>  $token
             ));
-            if(!empty($response['status'])) {
+            if(isset($response['status'])) {
                 return $response['status'];
             }
         }
@@ -131,7 +131,7 @@ class DirectBilling {
         $response = $this->restGET(WS_LIST, array(
             'apiKey'    =>  $this->apiKey
         ));
-        if(!empty($response)) {
+        if(isset($response)) {
             return $response;
         }
         return false;
