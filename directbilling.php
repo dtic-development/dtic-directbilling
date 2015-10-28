@@ -83,6 +83,7 @@ class DirectBilling {
 
             if(!empty($response) && $response['status'] == TOKEN_VALID) {
                 $_SESSION['token'] = $token;
+                return array('status' => $response['status'], 'id' => $response['id'], 'token' => $token);
             }
             else {
                 $token = SUBSCRIPTION_ERROR;
