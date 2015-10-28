@@ -8,12 +8,12 @@ define("TOKEN_VALID",0);
 define("TOKEN_INVALID",-100);
 
 define("URL","http://api.smspremium.net/createSession.php");
-define("WS_CHECK","http://api.smspremium.net/wsCheckSubscription.php?wsdl");
-define("WS_TERMINATE","http://api.smspremium.net/wsTerminateSubscription.php?wsdl");
-define("WS_LIST","http://api.smspremium.net/wsListSubscriptions.php?wsdl");
+define("WS_CHECK","http://api.smspremium.net/api/subscriptions/check/[apiKey]/[token]");
+define("WS_TERMINATE","http://api.smspremium.net/api/subscriptions/terminate/[apiKey]/[token]");
+define("WS_LIST","http://api.smspremium.net/api/subscriptions/list/[apiKey]");
 
 
-Class DirectBilling {
+class DirectBilling {
 
     protected $apiKey;
 
@@ -21,149 +21,122 @@ Class DirectBilling {
         $this->apiKey = $apiKey;
     }
 
-    function checkSubscription ($extra = null){
-
-        $apiKey = $this->apiKey;
-
-        $status=SUBSCRIPTION_ACTIVE;
-        $error= "";
-
-
-        //Check if token has been provided on request if yes ensure it is correct calling a WS and store it in session
-        if (isset($_REQUEST['token'])){
-            $token=$_REQUEST['token'];
-        }
-        else{
-            if (isset($_SESSION['token'])){
-                $token=$_SESSION['token'];
-            }
-        }
-
-        if (isset($_SESSION['token'])){
-            $_SESSION['token']=null;
-        }
-
-        if (isset($token)){
-
-            // Check subscription
-            // Returns : 0  --> Valid token
-            //           -1 --> Subscription error
-            //           -2 --> Invalid api key
-            //           -3 --> Invalid token
-
-            $client = new SoapClient(WS_CHECK, array('trace' => true));
-
-            try {
-                $output = $client->checkSubscription(
-                    $apiKey,
-                    $token
-                );
-            }
-            catch(Exception $e) {
-                $this->logError($e);
-                /*
-                echo "Response:\n" . $client->__getLastResponse() . "\n";
-                echo "REQUEST:\n" . htmlentities($client->__getLastRequest()) . "\n";
-                */
-            }
-
-            // If the token is successful save it in session
-            if ($output == TOKEN_VALID) {
-                $_SESSION['token']=$token;
-            }
-            else {
-
-                $token = SUBSCRIPTION_ERROR;
-                if (isset($_SESSION['token'])){
-                    $_SESSION['token']=null;
-                }
-
-                $url= $this->curPageURL();
-                error_log ("Current url ".$url);
-                $url = preg_replace('~(\?|&)token=[^&]*~','$1',$url);
-                error_log ("Current url without token ".$url);
-
-                $urlRedirect = URL."?w=".$apiKey."&f=".$url;
-                if(!empty($extra)) {
-                    $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
-                }
-                $this->redirect($urlRedirect);
-            }
-
-            return array('status' => $output, 'token' => $token);
-
-        }
-        else{
-            //Token was not on the session neither on the request
-            //Request a new one identifying the customer and/or creating a subscription
-            $urlRedirect = URL."?w=".$apiKey."&f=".$this->curPageURL();
-            if(!empty($extra)) {
-                $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
-            }
-            $this->redirect($urlRedirect);
-
-        }
-    }
-
     /**
-     * Terminate subscription
-     *
-     * @param $token
-     * @return int
-     *
-     * @return
-     *	SUBSCRIPTION_INACTIVE_SUCCESFULLY --> 0
-     *  INVALID_TOKEN --> -100
-     *  SUBSCRIPTION_ALREADY_INACTIVE --> -200
-     *	SUBSCRIPTION_NOTFOUND  --> -201
-     *	SUBSCRIPTION_ERROR --> -202
-     *
+     * @param $service_url
+     * @param $params
+     * @return mixed
      */
-    function terminateSubscription($token) {
+    private function restGET($service_url, $params) {
 
-        $apiKey = $this->apiKey;
-
-        if ($token){
-
-            $client = new SoapClient(WS_TERMINATE);
-
-            $output = $client->terminateSubscription(
-                $apiKey,
-                $token
-            );
-            return $output;
-        }
-        else{
-            return INVALID_TOKEN;
+        foreach($params as $name => $value) {
+            $service_url = str_replace("[$name]", $value, $service_url);
         }
 
+        $curl = curl_init($service_url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        $curl_response = curl_exec($curl);
+        curl_close($curl);
+        $curl_json = json_decode($curl_response, true);
 
+        return $curl_json;
     }
 
     /**
      * @return bool
      */
-    function listSubscriptions() {
-
-        $apiKey = $this->apiKey;
-
-        $client = new SoapClient(WS_LIST, array('trace' => true));
-
-
-        try {
-            $output = $client->listSubscriptions(
-                $apiKey
-            );
+    private function getToken() {
+        if (isset($_REQUEST['token'])) {
+            return $_REQUEST['token'];
         }
-        catch(Exception $e) {
-            echo "Response:\n" . $client->__getLastResponse() . "\n";
-
-            echo "REQUEST:\n" . htmlentities($client->__getLastRequest()) . "\n";
-            return false;
+        else{
+            if (isset($_SESSION['token'])){
+                return $_SESSION['token'];
+            }
         }
-
-        return $output;
+        return false;
     }
+
+    /**
+     *
+     */
+    private function removeTokenFromSession() {
+        if (isset($_SESSION['token'])){
+            $_SESSION['token'] = null;
+        }
+    }
+
+    /**
+     * @param null $extra
+     * @return array
+     */
+    public function checkSubscription($extra = null) {
+        $token = $this->getToken();
+        $this->removeTokenFromSession();
+
+        if(!empty($token)) {
+            $response = $this->restGET(WS_CHECK, array(
+                'apiKey'    =>  $this->apiKey,
+                'token'     =>  $token
+            ));
+
+            if(!empty($response) && $response['status'] == TOKEN_VALID) {
+                $_SESSION['token'] = $token;
+            }
+            else {
+                $token = SUBSCRIPTION_ERROR;
+                $currentUrlWithoutToken = preg_replace('~(\?|&)token=[^&]*~', '$1', $this->currentPageURL());
+
+                $urlRedirect = URL."?w=".$this->apiKey."&f=".$currentUrlWithoutToken;
+
+                if(!empty($extra)) {
+                    $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
+                }
+                $this->redirect($urlRedirect);
+            }
+            return array('status' => $response['status'], 'token' => $token);
+        }
+        else {
+            $urlRedirect = URL."?w=".$this->apiKey."&f=".$this->currentPageURL();
+            if(!empty($extra)) {
+                $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
+            }
+            $this->redirect($urlRedirect);
+        }
+    }
+
+
+    /**
+     * @param $token
+     * @return int
+     */
+    public function terminateSubscription($token) {
+        if(!empty($token)) {
+            $response = $this->restGET(WS_TERMINATE, array(
+                'apiKey'    =>  $this->apiKey,
+                'token'     =>  $token
+            ));
+            if(isset($response['status'])) {
+                return $response['status'];
+            }
+        }
+        return INVALID_TOKEN;
+    }
+
+    /**
+     * @return bool|mixed
+     */
+    public function listSubscriptions() {
+        $response = $this->restGET(WS_LIST, array(
+            'apiKey'    =>  $this->apiKey
+        ));
+        if(isset($response)) {
+            return $response;
+        }
+        return false;
+    }
+
 
     /**
      * @param $url
@@ -180,7 +153,7 @@ Class DirectBilling {
     /**
      * @return string
      */
-    function curPageURL() {
+    function currentPageURL() {
         $pageURL = 'http';
         if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
             $pageURL .= "s";
