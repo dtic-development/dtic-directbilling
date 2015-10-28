@@ -4,7 +4,7 @@ ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 error_reporting(-1);
 
-require_once('directbilling_rest.php');
+require_once('directbilling.php');
 @session_start();
 
 define('DTIC_API_KEY', 'bad6ee38a4b4b6e74c0dd968a6d5fa90');
