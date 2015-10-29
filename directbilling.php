@@ -99,7 +99,7 @@ class DirectBilling {
             return array('status' => $response['status'], 'token' => $token);
         }
         else {
-            $urlRedirect = URL."?w=".$this->apiKey."&f=".$this->currentPageURL();
+            $urlRedirect = URL."?w=".$this->apiKey."&f=".urlencode($this->currentPageURL());
             if(!empty($extra)) {
                 $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
             }
