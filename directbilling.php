@@ -89,7 +89,7 @@ class DirectBilling {
                 $token = SUBSCRIPTION_ERROR;
                 $currentUrlWithoutToken = preg_replace('~(\?|&)token=[^&]*~', '$1', $this->currentPageURL());
 
-                $urlRedirect = URL."?w=".$this->apiKey."&f=".$currentUrlWithoutToken;
+                $urlRedirect = URL."?w=".$this->apiKey."&f=".urlencode($currentUrlWithoutToken);
 
                 if(!empty($extra)) {
                     $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
