@@ -11,6 +11,7 @@ define("URL","http://api.smspremium.net/subscriptions/sessions/create/");
 define("WS_CHECK","http://api.smspremium.net/api/subscriptions/check/[apiKey]/[token]");
 define("WS_TERMINATE","http://api.smspremium.net/api/subscriptions/terminate/[apiKey]/[token]");
 define("WS_LIST","http://api.smspremium.net/api/subscriptions/list/[apiKey]");
+define("CREATE_SUBSCRIPTION_URL","http://api.smspremium.net/subscriptions/create");
 
 
 class DirectBilling {
