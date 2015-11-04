@@ -1,5 +1,6 @@
 <?php
 // Subscription status
+define('DEVEL', 0);
 define("SUBSCRIPTION_ACTIVE",0);
 define("SUBSCRIPTION_ERROR",-1);
 define("APIKEY_INVALID",-2);
@@ -7,11 +8,21 @@ define("APIKEY_INVALID",-2);
 define("TOKEN_VALID",0);
 define("TOKEN_INVALID",-100);
 
-define("URL","http://api.smspremium.net/subscriptions/sessions/create/");
-define("WS_CHECK","http://api.smspremium.net/api/subscriptions/check/[apiKey]/[token]");
-define("WS_TERMINATE","http://api.smspremium.net/api/subscriptions/terminate/[apiKey]/[token]");
-define("WS_LIST","http://api.smspremium.net/api/subscriptions/list/[apiKey]");
-define("CREATE_SUBSCRIPTION_URL","http://api.smspremium.net/subscriptions/create");
+if(DEVEL) {
+    define("URL","http://devel.smspremium.net/subscriptions/sessions/create/");
+    define("WS_CHECK","http://devel.smspremium.net/api/subscriptions/check/[apiKey]/[token]");
+    define("WS_TERMINATE","http://devel.smspremium.net/api/subscriptions/terminate/[apiKey]/[token]");
+    define("WS_LIST","http://devel.smspremium.net/api/subscriptions/list/[apiKey]");
+    define("CREATE_SUBSCRIPTION_URL","http://devel.smspremium.net/subscriptions/create");
+}
+else {
+    define("URL","http://api.smspremium.net/subscriptions/sessions/create/");
+    define("WS_CHECK","http://api.smspremium.net/api/subscriptions/check/[apiKey]/[token]");
+    define("WS_TERMINATE","http://api.smspremium.net/api/subscriptions/terminate/[apiKey]/[token]");
+    define("WS_LIST","http://api.smspremium.net/api/subscriptions/list/[apiKey]");
+    define("CREATE_SUBSCRIPTION_URL","http://api.smspremium.net/subscriptions/create");
+}
+
 
 
 class DirectBilling {
