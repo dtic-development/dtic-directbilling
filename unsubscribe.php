@@ -1,5 +1,4 @@
 <?php
-
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 error_reporting(-1);
@@ -14,8 +13,9 @@ $billing = new DirectBilling(DTIC_API_KEY);
 $subscription = $billing->checkSubscription();
 
 if($subscription['status'] == 0) {
+
     $status = $billing->terminateSubscription($subscription['token']);
-    echo "Terminate [$status]";
+    echo "Terminate [$status] [token:{$subscription['token']}]";
 }
 else {
     echo "Subscription is not active";
