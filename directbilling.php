@@ -134,7 +134,7 @@ class DirectBilling {
                 return $response['status'];
             }
         }
-        return INVALID_TOKEN;
+        return TOKEN_INVALID;
     }
 
     /**
