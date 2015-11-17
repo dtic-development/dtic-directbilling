@@ -79,6 +79,10 @@ class DirectBilling {
         }
     }
 
+    public function cleanSession() {
+        unset($_SESSION['token']);
+    }
+
     /**
      * @param null $extra
      * @return array

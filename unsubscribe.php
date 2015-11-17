@@ -16,6 +16,7 @@ if($subscription['status'] == 0) {
 
     $status = $billing->terminateSubscription($subscription['token']);
     echo "Terminate [$status] [token:{$subscription['token']}]";
+    $billing->cleanSession();
 }
 else {
     echo "Subscription is not active";
