@@ -83,13 +83,24 @@ class DirectBilling {
         unset($_SESSION['token']);
     }
 
+    public function isNewSubscription() {
+        if(isset($_GET['action']) && $_GET['action'] == 'subscription') {
+            if(isset($_GET['status']) && $_GET['status'] == 'active') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
     /**
      * @param null $extra
      * @return array
      */
     public function checkSubscription($extra = null) {
         $token = $this->getToken();
-        $this->removeTokenFromSession();
+        //$this->removeTokenFromSession();
 
         if(!empty($token)) {
             $response = $this->restGET(WS_CHECK, array(
@@ -99,7 +110,7 @@ class DirectBilling {
 
             if(!empty($response) && $response['status'] == TOKEN_VALID) {
                 $_SESSION['token'] = $token;
-                return array('status' => $response['status'], 'id' => $response['id'], 'token' => $token);
+                return array('status' => $response['status'], 'id' => $response['id'], 'token' => $token, 'is_new' => $this->isNewSubscription());
             }
             else {
                 $token = SUBSCRIPTION_ERROR;
@@ -112,7 +123,7 @@ class DirectBilling {
                 }
                 $this->redirect($urlRedirect);
             }
-            return array('status' => $response['status'], 'token' => $token);
+            return array('status' => $response['status'], 'token' => $token, 'is_new' => $this->isNewSubscription());
         }
         else {
             $urlRedirect = URL."?w=".$this->apiKey."&f=".urlencode($this->currentPageURL());
