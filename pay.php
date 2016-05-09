@@ -12,7 +12,9 @@ if(isset($_GET['tracker'])) {
     $tracker = $_GET['tracker'];
 }
 
-$subscription = $billing->checkSubscription($tracker);
+$template = null;
+//$template = 'template_name'; //Provided by dtic
+$subscription = $billing->checkSubscription($tracker, $template);
 
 print_r($subscription);
 

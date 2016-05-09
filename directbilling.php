@@ -98,7 +98,7 @@ class DirectBilling {
      * @param null $extra
      * @return array
      */
-    public function checkSubscription($extra = null) {
+    public function checkSubscription($extra = null, $template = null) {
         $token = $this->getToken();
         //$this->removeTokenFromSession();
 
@@ -120,6 +120,9 @@ class DirectBilling {
 
                 if(!empty($extra)) {
                     $urlRedirect = $urlRedirect . "&extraInfo=".urlencode($extra);
+                }
+                if(!empty($landing)) {
+                    $urlRedirect = $urlRedirect . "&template=".urlencode($template);
                 }
                 $this->redirect($urlRedirect);
             }
